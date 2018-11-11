@@ -62,6 +62,7 @@ konstruktora kopiującego.
 
     Dodawanie, np.
 
+```
     Wallet w1(1), w2(2);
     Wallet suma1 = w1 + Wallet(1); // błąd kompilacji
     Wallet suma2 = Wallet(2) + w2; // OK, w w2 jest 0 B po operacji
@@ -72,6 +73,7 @@ konstruktora kopiującego.
     Wallet suma3 = suma1 + suma2;  // błąd kompilacji
     Wallet suma4 = Wallet(1) + Wallet(2);  // OK, suma4 ma dwa wpisy
                                            // w historii i 3 B
+```
 
 #### w1 - w2
 
