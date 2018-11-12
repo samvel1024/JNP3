@@ -4,3 +4,4 @@
 !.gitignore
 !README.md
 !wallet_example.cpp
+!wallet.h
