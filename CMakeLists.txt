@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.12)
 project(JNP3)
 
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 
-add_executable(JNP3 main.cpp)
+add_executable(JNP3 main.cpp wallet_example.cpp wallet.h wallet.cpp)
