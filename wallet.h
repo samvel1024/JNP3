@@ -106,6 +106,10 @@ public:
         create_and_add(n * UNITS_IN_B);
     }
 
+    Wallet(Wallet &w){
+        Wallet();//TODO Impl copy constructor
+    }
+
     Wallet(Wallet &&w) {
         operations = std::move(w.operations);
         units = w.units;
