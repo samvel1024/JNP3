@@ -2,7 +2,8 @@
 #include <cassert>
 #include <iostream>
 
-static const unsigned int UNITS_IN_B = 100000000;
+//TODO bring this back after moving the class declaration to .h file
+//static const unsigned int UNITS_IN_B = 100000000;
 
 using std::move;
 
@@ -43,7 +44,7 @@ int main() {
     assert(Wallet(move(w4)).opSize() == 4);
 
     Wallet w5{2};
-    Wallet w6 = Wallet(10) - w5;
+    Wallet &w6 = Wallet(10) - w5; //TODO Must not be a reference in the real test (Wallet w6 = Wallet(10) - w5;)
     assert(w5 == Wallet(4));
     assert(w6 == Wallet(8));
 }
