@@ -24,10 +24,10 @@ int main() {
 
     assert(Wallet::fromBinary("100") == Wallet(4));
     assert(Wallet(" 1.2000 ") == Wallet("1,2"));
-
+    
     assert(Wallet(2) + w2 == Wallet(3));
     assert(Wallet(1) + Wallet(2) == Wallet(3));
-    assert(1 + 2 == Wallet(3));
+    assert((1 + 2) == Wallet(3));
 
     Wallet w4;
     assert(w4.opSize() == 1);
@@ -35,16 +35,18 @@ int main() {
     w4 += 2;
     assert(w4.opSize() == 2);
     assert(w4[0] <= w4[1]);
+
     assert(w4[1].getUnits() == w4.getUnits());
 
     w4 *= 3;
     assert(w4.opSize() == 3);
+
     assert(w4[2].getUnits() == 6 * UNITS_IN_B);
 
     assert(Wallet(move(w4)).opSize() == 4);
 
     Wallet w5{2};
-    Wallet w6 = Wallet(10) - w5; //TODO Must not be a reference in the real test (Wallet w6 = Wallet(10) - w5;)
+    Wallet w6 = Wallet(10) - w5;
     assert(w5 == Wallet(4));
     assert(w6 == Wallet(8));
 }

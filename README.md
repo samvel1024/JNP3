@@ -96,7 +96,7 @@ w1.getUnits() + w2.getUnits() jednostek i jeden dodatkowy wpis w historii.
 
 Analogicznie do dodawania.
 
-#### w1 *= n
+#### w1 \*= n
 
 Pomnożenie zawartości portfela przez liczbę naturalną.
 Dodaje jeden wpis w historii w1.

@@ -8,3 +8,6 @@
  * If you know how to deal with this please fix
  *
  */
+#include <wallet.h>
+
+number Wallet::counter = 21000000 * UNITS_IN_B;

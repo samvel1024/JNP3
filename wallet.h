@@ -5,11 +5,15 @@
 #include <ostream>
 #include <chrono>
 #include <algorithm>
+
+#include <iostream> // TODO remove that, to debug only
+
 /*
  * Side notes for implementation
  *    Check for self-assignment in assignment operations
  *    Define your binary (+) arithmetic operators using your compound assignment operators (+=)
  *    Double check if there is no copy constructor/copy assignment and delete if there is
+ *    Double check that we are not repeating adding history operations anywhere
  */
 
 
@@ -72,21 +76,24 @@ private:
     std::vector<WalletOperation> operations;
     number units;
 
+    static number TOTAL_B_UNITS; 
+
     void create_and_add(number n) {
+        units = n;
         // TODO check if it is less than the total number of B allowed
         add_operation(n);
     }
 
     void add_operation(number n) {
-        operations.emplace_back(n);
+        operations.emplace_back(n); // TODO why emplace_back and not push_back()?
     }
 
 public:
-    Wallet() : units(0) {
+    Wallet() {
         create_and_add(0);
     }
 
-    explicit Wallet(number n) : units(n) {
+    explicit Wallet(number n) {
         create_and_add(n * UNITS_IN_B);
     }
 
@@ -104,10 +111,6 @@ public:
         }
 
         create_and_add(n * UNITS_IN_B);
-    }
-
-    Wallet(Wallet &w){
-        Wallet();//TODO Impl copy constructor
     }
 
     Wallet(Wallet &&w) {
@@ -134,13 +137,14 @@ public:
             std::make_move_iterator(b.operations.end())
         );
         std::sort(operations.begin(), operations.end());
+        create_and_add(units);
     }
 
     int getUnits() const {
         return units;
     }
 
-    int opSize() const {
+    size_t opSize() const {
         return static_cast<int>(operations.size());
     }
 
@@ -149,8 +153,8 @@ public:
         return units == other.units;
     }
 
-    bool operator==(const number num) const {
-        return units == num;
+    bool operator==(number other) const {
+        return units == other * UNITS_IN_B;
     }
 
     bool operator<(const Wallet &other) const {
@@ -173,66 +177,41 @@ public:
         return operator>(other) || operator==(other);
     }
 
-    Wallet &operator=(Wallet &&rhs) {
+    Wallet operator=(Wallet &&rhs) {
         // return value optimization should kick in here
         // TODO ask about that during lab
-//        return Wallet(rhs);
-        return *this; // Just to compile
+       return Wallet(std::forward<Wallet>(rhs));
     }
 
-    Wallet &operator+=(Wallet &rhs) {
-        *(this) += rhs.units;
+    void operator+=(Wallet &rhs) {
+        // the ordering of these is important!
+        // as we have to care not to exceed the Bs global limit
+        // TODO remember to check adding history here
         rhs -= rhs.units;
-        return *this;
+        (*this) += rhs.units;
     }
 
-    Wallet &operator-=(Wallet &rhs) {
+    void operator-=(Wallet &rhs) {
+        // the ordering of these is important!
+        // TODO remember to check adding history here
         *(this) -= rhs.units;
-        //TODO not exactly what we need
-        return *this;
+        rhs += rhs.units;
     }
 
-    Wallet &operator-=(number rhs) {
+
+    void operator-=(number rhs) {
         *(this) += (-rhs);
-        return *(this);
     }
 
-    Wallet &operator+=(number rhs) {
-        this->units += rhs;
-        this->add_operation(rhs);
-        return *this;
+    void operator+=(number rhs) {
+        this->units += (rhs * UNITS_IN_B);
+        this->add_operation(rhs * UNITS_IN_B);
     }
 
-    Wallet &operator*=(number rhs) {
+    void operator*=(number rhs) {
         number to_be_added = rhs * units - units;
-        *(this) += rhs;
-        return *this;
+        *(this) += to_be_added;
     }
-
-    Wallet &operator+(Wallet &other) {
-        *(this) += other;
-        return *(this);
-    }
-
-
-    Wallet &operator+(Wallet &&other) {
-        //TODO probably wrong, needed for supporting Wallet(1) + Wallet(2)
-        *(this) += other;
-        return *(this);
-    }
-
-
-    Wallet &operator-(Wallet &other) {
-        //TODO Odejmowanie, analogicznie jak dodawanie, ale po odejmowaniu w w2 jest dwa razy więcej jednostek, niż było w w2 przed odejmowaniem.
-        *(this) -= other;
-        return *(this);
-    }
-
-    //TODO why explicit ? It failed to compile xD
-    const Wallet &operator*(number rhs) {
-        *(this) *= rhs;
-        return *this;
-    };
 
     const WalletOperation &operator[](size_t x) const {
         // TODO will it really return const reference?
@@ -244,17 +223,80 @@ public:
         return os;
     }
 
-    friend bool operator==(const int &lhs, const Wallet &rhs) {
-        return lhs == rhs.units;
-    }
-
-    static const Wallet fromBinary(const std::string &val) {
-        return Wallet(val);
+    static Wallet fromBinary(const std::string &val) {
+        return Wallet(stoi(val, nullptr, 2));
     }
 };
 
 
+Wallet operator*(Wallet &&lhs, number rhs) {
+    lhs *= rhs;
+    return Wallet(std::forward<Wallet>(lhs));  // TODO very ugly
+}
+
+Wallet operator*(number lhs, Wallet&& rhs) {
+    rhs *= lhs;
+    return Wallet(std::forward<Wallet>(rhs));
+};
+
+Wallet operator+(Wallet &&lhs, Wallet &&rhs) {
+    return Wallet(std::forward<Wallet>(lhs), std::forward<Wallet>(rhs));
+}
+
+Wallet operator+(Wallet &&lhs, Wallet &rhs) {
+    number units = (rhs.getUnits() / UNITS_IN_B);
+    rhs -= units;
+    auto w = Wallet(std::forward<Wallet>(lhs));
+    w += units;
+    return w;
+}
+
+
+// TODO substracting not done!!! 
+// TODO Odejmowanie, analogicznie jak dodawanie, ale po odejmowaniu w w2 jest dwa razy więcej jednostek, niż było w w2 przed odejmowaniem.
+Wallet operator-(Wallet &&lhs, Wallet &&rhs) {
+    return Wallet(std::forward<Wallet>(lhs), std::forward<Wallet>(rhs));
+}
+
+Wallet operator-(Wallet &&lhs, Wallet &rhs) {
+    number units = rhs.getUnits();
+    rhs -= units;
+    auto w = Wallet(std::forward<Wallet>(lhs));
+    w += units;
+    return w;
+}
+
+
+// TODO this is needed
+bool operator==(number lhs, const Wallet &rhs) {    
+    return lhs * UNITS_IN_B == rhs.getUnits();
+}
+
+// TODO But are these? 
+
+bool operator<(number lhs, const Wallet &rhs) {
+    return lhs < rhs.getUnits();
+}
+
+bool operator!=(number lhs, const Wallet &rhs) {
+    return !operator==(lhs, rhs);
+}
+
+bool operator<=(number lhs, const Wallet &rhs) {
+    return operator<(lhs, rhs) || operator==(lhs, rhs);
+}
+
+bool operator>(number lhs, const Wallet &rhs) {
+    return operator!=(lhs, rhs) && !operator<(lhs, rhs);
+}
+
+bool operator>=(number lhs, const Wallet &rhs) {
+    return operator>(lhs, rhs) || operator==(lhs, rhs);
+}
+
+
 const Wallet Empty() {
+    // TODO empty wallet should be non-modifiable
     return Wallet();
 }
 
