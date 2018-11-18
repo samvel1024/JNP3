@@ -26,7 +26,7 @@ class WalletOperation {
 
 public:
     WalletOperation(number u) : units(u) {
-        // some assert here?
+        // some assert here that u >= 0 etc
         performed = duration_cast<milliseconds>(
             system_clock::now().time_since_epoch()
         );
@@ -85,7 +85,7 @@ private:
     }
 
     void add_operation(number n) {
-        operations.emplace_back(n); // TODO why emplace_back and not push_back()?
+        operations.emplace_back(n);
     }
 
 public:
@@ -144,7 +144,6 @@ public:
     size_t opSize() const {
         return static_cast<int>(operations.size());
     }
-
 
     bool operator==(const Wallet &other) const {
         return units == other.units;
@@ -253,8 +252,6 @@ Wallet operator+(Wallet &&lhs, Wallet &rhs) {
     return w;
 }
 
-// TODO substracting not done!!! 
-// TODO Odejmowanie, analogicznie jak dodawanie, ale po odejmowaniu w w2 jest dwa razy więcej jednostek, niż było w w2 przed odejmowaniem.
 Wallet operator-(Wallet &&lhs, Wallet &&rhs) {
     auto w = Wallet(std::forward<Wallet>(lhs));
     w -= (rhs.getUnits() / UNITS_IN_B);
