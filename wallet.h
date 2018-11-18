@@ -105,12 +105,11 @@ public:
         if (s.find(',') != std::string::npos) {
             std::string s_period = s;
             std::replace(s_period.begin(), s_period.end(), ',', '.');
-            n = stof(s_period);
+            n = stof(s_period) * UNITS_IN_B;
         } else {
-            n = stof(s);
+            n = stof(s) * UNITS_IN_B;
         }
-
-        create_and_add(n * UNITS_IN_B);
+        create_and_add(n);
     }
 
     Wallet(Wallet &&w) {
