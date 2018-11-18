@@ -5,8 +5,11 @@
 #include <ostream>
 #include <chrono>
 #include <algorithm>
+#include <regex>
+
 
 #include <iostream> // TODO remove that, to debug only
+#include <cassert>
 
 /*
  * Side notes for implementation
@@ -98,9 +101,8 @@ public:
     }
 
     Wallet(std::string s) {
-        // TODO assert that it has max 8 places after comma
-        // TODO assert that it is a correct number (eg not "abcd")
-        // TODO can we modify string s? then it would be much less complicated
+        const std::regex reg("\\s*[-+]?[0-9]*[.,]?[0-9]{1,8}([eE][-+]?[0-9]+)?\\s*");
+        assert(std::regex_match(s, reg));
         number n;
         if (s.find(',') != std::string::npos) {
             std::string s_period = s;
