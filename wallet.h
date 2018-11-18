@@ -14,6 +14,7 @@
  *    Define your binary (+) arithmetic operators using your compound assignment operators (+=)
  *    Double check if there is no copy constructor/copy assignment and delete if there is
  *    Double check that we are not repeating adding history operations anywhere
+ *    Double check that we are not multiplying UNITS_IN_B by UNITS_IN_B (it happens very often...)
  */
 
 
@@ -116,7 +117,7 @@ public:
         operations = std::move(w.operations);
         units = w.units;
         w.units = 0;
-        add_operation(0);
+        add_operation(units);
     }
 
     Wallet(Wallet &&a, Wallet &&b) {
