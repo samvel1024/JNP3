@@ -18,7 +18,7 @@
 
 
 using namespace std::chrono;
-using number = unsigned int;
+using number = int;
 const number UNITS_IN_B = 100000000;
 
 
@@ -117,9 +117,7 @@ public:
         operations = std::move(w.operations);
         units = w.units;
         w.units = 0;
-
-        number X = 0; //TODO what should be there?
-        add_operation(X);
+        add_operation(0);
     }
 
     Wallet(Wallet &&a, Wallet &&b) {
@@ -183,34 +181,39 @@ public:
        return Wallet(std::forward<Wallet>(rhs));
     }
 
-    void operator+=(Wallet &rhs) {
+    Wallet& operator+=(Wallet &rhs) {
         // the ordering of these is important!
         // as we have to care not to exceed the Bs global limit
         // TODO remember to check adding history here
         rhs -= rhs.units;
         (*this) += rhs.units;
+        return (*this);
     }
 
-    void operator-=(Wallet &rhs) {
+    Wallet& operator-=(Wallet &rhs) {
         // the ordering of these is important!
         // TODO remember to check adding history here
         *(this) -= rhs.units;
         rhs += rhs.units;
+        return (*this);
     }
 
 
-    void operator-=(number rhs) {
+    Wallet& operator-=(number rhs) {
         *(this) += (-rhs);
+        return (*this);
     }
 
-    void operator+=(number rhs) {
+    Wallet& operator+=(number rhs) {
         this->units += (rhs * UNITS_IN_B);
-        this->add_operation(rhs * UNITS_IN_B);
+        this->add_operation(this->units);
+        return (*this);
     }
 
-    void operator*=(number rhs) {
-        number to_be_added = rhs * units - units;
+    Wallet& operator*=(number rhs) {
+        number to_be_added = (rhs * units - units) / UNITS_IN_B;
         *(this) += to_be_added;
+        return (*this);
     }
 
     const WalletOperation &operator[](size_t x) const {
@@ -229,15 +232,15 @@ public:
 };
 
 
-Wallet operator*(Wallet &&lhs, number rhs) {
-    lhs *= rhs;
-    return Wallet(std::forward<Wallet>(lhs));  // TODO very ugly
+Wallet operator*(Wallet &lhs, number rhs) {
+    rhs *= (lhs.getUnits() / UNITS_IN_B);
+    return Wallet(rhs);
 }
 
-Wallet operator*(number lhs, Wallet&& rhs) {
-    rhs *= lhs;
-    return Wallet(std::forward<Wallet>(rhs));
-};
+Wallet operator*(number lhs, Wallet& rhs) {
+    lhs *= (rhs.getUnits() / UNITS_IN_B);
+    return Wallet(lhs);
+}
 
 Wallet operator+(Wallet &&lhs, Wallet &&rhs) {
     return Wallet(std::forward<Wallet>(lhs), std::forward<Wallet>(rhs));
@@ -251,21 +254,21 @@ Wallet operator+(Wallet &&lhs, Wallet &rhs) {
     return w;
 }
 
-
 // TODO substracting not done!!! 
 // TODO Odejmowanie, analogicznie jak dodawanie, ale po odejmowaniu w w2 jest dwa razy więcej jednostek, niż było w w2 przed odejmowaniem.
 Wallet operator-(Wallet &&lhs, Wallet &&rhs) {
-    return Wallet(std::forward<Wallet>(lhs), std::forward<Wallet>(rhs));
-}
-
-Wallet operator-(Wallet &&lhs, Wallet &rhs) {
-    number units = rhs.getUnits();
-    rhs -= units;
     auto w = Wallet(std::forward<Wallet>(lhs));
-    w += units;
+    w -= (rhs.getUnits() / UNITS_IN_B);
     return w;
 }
 
+Wallet operator-(Wallet &&lhs, Wallet &rhs) {
+    number units = rhs.getUnits() / UNITS_IN_B;
+    rhs += units;
+    auto w = Wallet(std::forward<Wallet>(lhs));
+    w -= units;
+    return w;
+}
 
 // TODO this is needed
 bool operator==(number lhs, const Wallet &rhs) {    
@@ -273,26 +276,25 @@ bool operator==(number lhs, const Wallet &rhs) {
 }
 
 // TODO But are these? 
+// bool operator<(number lhs, const Wallet &rhs) {
+//     return lhs < rhs.getUnits();
+// }
 
-bool operator<(number lhs, const Wallet &rhs) {
-    return lhs < rhs.getUnits();
-}
+// bool operator!=(number lhs, const Wallet &rhs) {
+//     return !operator==(lhs, rhs);
+// }
 
-bool operator!=(number lhs, const Wallet &rhs) {
-    return !operator==(lhs, rhs);
-}
+// bool operator<=(number lhs, const Wallet &rhs) {
+//     return operator<(lhs, rhs) || operator==(lhs, rhs);
+// }
 
-bool operator<=(number lhs, const Wallet &rhs) {
-    return operator<(lhs, rhs) || operator==(lhs, rhs);
-}
+// bool operator>(number lhs, const Wallet &rhs) {
+//     return operator!=(lhs, rhs) && !operator<(lhs, rhs);
+// }
 
-bool operator>(number lhs, const Wallet &rhs) {
-    return operator!=(lhs, rhs) && !operator<(lhs, rhs);
-}
-
-bool operator>=(number lhs, const Wallet &rhs) {
-    return operator>(lhs, rhs) || operator==(lhs, rhs);
-}
+// bool operator>=(number lhs, const Wallet &rhs) {
+//     return operator>(lhs, rhs) || operator==(lhs, rhs);
+// }
 
 
 const Wallet Empty() {

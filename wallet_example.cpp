@@ -22,10 +22,13 @@ int main() {
     assert(w2.opSize() == 1);
     assert(w2.getUnits() == UNITS_IN_B);
 
+
     assert(Wallet::fromBinary("100") == Wallet(4));
     assert(Wallet(" 1.2000 ") == Wallet("1,2"));
-    
+
     assert(Wallet(2) + w2 == Wallet(3));
+
+    
     assert(Wallet(1) + Wallet(2) == Wallet(3));
     assert((1 + 2) == Wallet(3));
 
