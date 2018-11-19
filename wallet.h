@@ -17,6 +17,7 @@
  *    Define your binary (+) arithmetic operators using your compound assignment operators (+=)
  *    Double check if there is no copy constructor/copy assignment and delete if there is
  *    Double check that we are not repeating adding history operations anywhere
+ *    Double check that we are not multiplying UNITS_IN_B by UNITS_IN_B (it happens very often...)
  */
 
 
@@ -29,7 +30,7 @@ class WalletOperation {
 
 public:
     WalletOperation(number u) : units(u) {
-        // some assert here?
+        // some assert here that u >= 0 etc
         performed = duration_cast<milliseconds>(
             system_clock::now().time_since_epoch()
         );
@@ -88,7 +89,7 @@ private:
     }
 
     void add_operation(number n) {
-        operations.emplace_back(n); // TODO why emplace_back and not push_back()?
+        operations.emplace_back(n);
     }
 
 public:
@@ -107,19 +108,18 @@ public:
         if (s.find(',') != std::string::npos) {
             std::string s_period = s;
             std::replace(s_period.begin(), s_period.end(), ',', '.');
-            n = stof(s_period);
+            n = stof(s_period) * UNITS_IN_B;
         } else {
-            n = stof(s);
+            n = stof(s) * UNITS_IN_B;
         }
-
-        create_and_add(n * UNITS_IN_B);
+        create_and_add(n);
     }
 
     Wallet(Wallet &&w) {
         operations = std::move(w.operations);
         units = w.units;
         w.units = 0;
-        add_operation(0);
+        add_operation(units);
     }
 
     Wallet(Wallet &&a, Wallet &&b) {
@@ -147,7 +147,6 @@ public:
     size_t opSize() const {
         return static_cast<int>(operations.size());
     }
-
 
     bool operator==(const Wallet &other) const {
         return units == other.units;
@@ -256,8 +255,6 @@ Wallet operator+(Wallet &&lhs, Wallet &rhs) {
     return w;
 }
 
-// TODO substracting not done!!! 
-// TODO Odejmowanie, analogicznie jak dodawanie, ale po odejmowaniu w w2 jest dwa razy więcej jednostek, niż było w w2 przed odejmowaniem.
 Wallet operator-(Wallet &&lhs, Wallet &&rhs) {
     auto w = Wallet(std::forward<Wallet>(lhs));
     w -= (rhs.getUnits() / UNITS_IN_B);
