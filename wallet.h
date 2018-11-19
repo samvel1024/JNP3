@@ -103,6 +103,7 @@ public:
 
     Wallet(std::string s) {
         const std::regex reg("\\s*[-+]?[0-9]*[.,]?[0-9]{1,8}([eE][-+]?[0-9]+)?\\s*");
+        //TODO find out if assert is a good practice in C++
         assert(std::regex_match(s, reg));
         number n;
         if (s.find(',') != std::string::npos) {
