@@ -6,6 +6,7 @@
 #include <chrono>
 #include <algorithm>
 #include <regex>
+#include <exception>
 
 
 #include <iostream> // TODO remove that, to debug only
@@ -108,9 +109,11 @@ public:
     }
 
     Wallet(std::string s) {
-        const std::regex reg("\\s*[-+]?[0-9]*[.,]?[0-9]{1,8}([eE][-+]?[0-9]+)?\\s*");
+        static const std::regex reg("\\s*[-+]?[0-9]*[.,]?[0-9]{1,8}([eE][-+]?[0-9]+)?\\s*");
         //TODO find out if assert is a good practice in C++
-        assert(std::regex_match(s, reg));
+        if(!std::regex_match(s, reg)){
+            throw std::invalid_argument("Given string is not a valid number");
+        }
         number n;
         if (s.find(',') != std::string::npos) {
             std::string s_period = s;
@@ -245,6 +248,10 @@ public:
     }
 
     static Wallet fromBinary(const std::string &val) {
+        static const std::regex reg("\\s*(0|1)+\\s*");
+        if (!std::regex_match(val, reg)) {
+            throw std::invalid_argument("Given string is not valid binary");
+        }
         return Wallet(stoi(val, nullptr, 2));
     }
 };
@@ -319,9 +326,9 @@ bool operator>=(number lhs, const Wallet &rhs) {
 }
 
 
-const Wallet Empty() {
-    // TODO empty wallet should be non-modifiable
-    return Wallet();
+const Wallet &Empty() {
+    static const Wallet empty = Wallet();
+    return empty;
 }
 
 #endif
