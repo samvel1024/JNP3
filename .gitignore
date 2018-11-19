@@ -6,3 +6,4 @@
 !wallet_example.cpp
 !wallet.h
 !wallet.cc
+!err_test.cc
