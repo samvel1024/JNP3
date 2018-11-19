@@ -141,6 +141,10 @@ public:
         create_and_add(units);
     }
 
+    ~Wallet(){
+
+    }
+
     int getUnits() const {
         return units;
     }
@@ -212,6 +216,12 @@ public:
         return (*this);
     }
 
+    Wallet& operator+=(Wallet &&rhs) {
+        //TODO
+        return (*this);
+    }
+
+
     Wallet& operator*=(number rhs) {
         number to_be_added = (rhs * units - units) / UNITS_IN_B;
         *(this) += to_be_added;
@@ -244,8 +254,19 @@ Wallet operator*(number lhs, Wallet& rhs) {
     return Wallet(lhs);
 }
 
+
 Wallet operator+(Wallet &&lhs, Wallet &&rhs) {
     return Wallet(std::forward<Wallet>(lhs), std::forward<Wallet>(rhs));
+}
+
+Wallet operator+(Wallet &&lhs, number rhs) {
+    //TODO
+    Wallet w(2);
+    return w;
+}
+
+Wallet operator+(number lhs, Wallet &rhs){
+    //TODO
 }
 
 Wallet operator+(Wallet &&lhs, Wallet &rhs) {
@@ -270,31 +291,29 @@ Wallet operator-(Wallet &&lhs, Wallet &rhs) {
     return w;
 }
 
-// TODO this is needed
-bool operator==(number lhs, const Wallet &rhs) {    
+bool operator==(number lhs, const Wallet &rhs) {
     return lhs * UNITS_IN_B == rhs.getUnits();
 }
 
-// TODO But are these? 
-// bool operator<(number lhs, const Wallet &rhs) {
-//     return lhs < rhs.getUnits();
-// }
+ bool operator<(number lhs, const Wallet &rhs) {
+     return lhs < rhs.getUnits();
+ }
 
-// bool operator!=(number lhs, const Wallet &rhs) {
-//     return !operator==(lhs, rhs);
-// }
+ bool operator!=(number lhs, const Wallet &rhs) {
+     return !operator==(lhs, rhs);
+ }
 
-// bool operator<=(number lhs, const Wallet &rhs) {
-//     return operator<(lhs, rhs) || operator==(lhs, rhs);
-// }
+ bool operator<=(number lhs, const Wallet &rhs) {
+     return operator<(lhs, rhs) || operator==(lhs, rhs);
+ }
 
-// bool operator>(number lhs, const Wallet &rhs) {
-//     return operator!=(lhs, rhs) && !operator<(lhs, rhs);
-// }
+ bool operator>(number lhs, const Wallet &rhs) {
+     return operator!=(lhs, rhs) && !operator<(lhs, rhs);
+ }
 
-// bool operator>=(number lhs, const Wallet &rhs) {
-//     return operator>(lhs, rhs) || operator==(lhs, rhs);
-// }
+ bool operator>=(number lhs, const Wallet &rhs) {
+     return operator>(lhs, rhs) || operator==(lhs, rhs);
+ }
 
 
 const Wallet Empty() {
