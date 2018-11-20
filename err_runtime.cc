@@ -43,7 +43,10 @@ int main() {
     Wallet w("")
 #endif
 #ifdef ERR10
-    Wallet w("0.111111111")
+    Wallet w("0.111111111");
+#endif
+#ifdef ERR11
+    Wallet::fromBinary("010101012");
 #endif
     return 0;
 }
