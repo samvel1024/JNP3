@@ -4,10 +4,6 @@
 #include <vector>
 #include <ostream>
 #include <chrono>
-#include <algorithm>
-#include <regex>
-#include <exception>
-#include <iomanip>
 
 using number = long long int;
 
