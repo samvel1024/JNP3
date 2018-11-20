@@ -91,14 +91,14 @@ void Wallet::check_for_overflow(number n) {
     }
 }
 
-void Wallet::check_for_underflow(number n) {
-    if (0 > n) {
+void Wallet::check_for_underflow(number balance, number n) {
+    if (0 > balance + n) {
         throw std::underflow_error("Wallets cannot have less than 0 units");
     }
 }
 
 void Wallet::create_and_add(number n) {
-    check_for_underflow(n);
+    check_for_underflow(0, n);
     check_for_overflow(n);
     Wallet::TOTAL_B_UNITS += n;
     units = n;
@@ -173,44 +173,6 @@ Wallet Wallet::operator=(Wallet &&rhs) {
     return Wallet(std::forward<Wallet>(rhs));
 }
 
-// Wallet &Wallet::operator-=(Wallet &&rhs) {
-//     *this -= rhs;
-//     return *this;
-// }
-
-// Wallet &Wallet::operator+=(Wallet &&rhs) {
-//     *this += rhs;
-//     return *this;
-// }
-
-// Wallet &Wallet::operator+=(Wallet &rhs) {
-//     // the ordering of these is important!
-//     // as we have to care not to exceed the Bs global limit
-//     number units = rhs.units;
-//     rhs.units = 0;
-//     rhs.add_operation(rhs.units);
-
-//     this->units += units;
-//     this->add_operation(this->units);
-//     return *this;
-// }
-
-// Wallet &Wallet::operator-=(Wallet &rhs) {
-//     // the ordering of these is important!
-
-//     if (rhs.units >= this->units) {
-//         throw std::underflow_error("Wallets cannot have less than 0 units");
-//     }
-
-//     this->units -= rhs.units;
-//     this->add_operation(this->units);
-
-//     rhs.units += rhs.units;
-//     rhs.add_operation(rhs.units);
-//     return *this;
-// }
-
-
 Wallet &Wallet::operator-=(Wallet &&rhs) {
     *this -= rhs;
     return *this;
@@ -222,21 +184,15 @@ Wallet &Wallet::operator+=(Wallet &&rhs) {
 }
 
 Wallet &Wallet::operator-=(number rhs) {
-    if (this->units - rhs < 0) {
-        ...
-    }
-    check_for_overflow(-rhs);
-    this->units -= rhs;
-    this->add_operation(this->units);
+    *this += (-rhs);
     return *this;
 }
 
 Wallet &Wallet::operator+=(number rhs) {
-    if (this->units + rhs < 0) {
-        ...
-    }
-    check_for_overflow(rhs);
-    this->units += rhs;
+    number units = rhs * UNITS_IN_B;
+    check_for_underflow(this->units, units);
+    check_for_overflow(units);
+    this->units += units;
     this->add_operation(this->units);
     return *this;
 }
@@ -244,7 +200,7 @@ Wallet &Wallet::operator+=(number rhs) {
 Wallet &Wallet::operator+=(Wallet &rhs) {
     // the ordering of these is important!
     // as we have to care not to exceed the Bs global limit
-    number bs = rhs.units / UNITS_IN_B;
+    number bs = rhs.getUnits() / UNITS_IN_B;
     rhs -= bs;
     *this += bs;
     return *this;
@@ -264,9 +220,8 @@ Wallet &Wallet::operator*=(number rhs) {
     number to_be_added = (rhs * units - units) / UNITS_IN_B;
     if (to_be_added >= 0) {
         *this += to_be_added;
-    }
-    else {
-        *this -= (-to_be_added);   
+    } else {
+        *this -= (-to_be_added);
     }
     return *this;
 }

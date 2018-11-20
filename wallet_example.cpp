@@ -73,7 +73,7 @@ void custom() {
 
     Wallet q1, q2;
     q1 = Wallet(1); // OK
-    //q1 = q2; // błąd kompilacji
+//    q1 = q2; // błąd kompilacji
 
     Wallet r1(1), r2(2);
     //r1 + r2; // błąd kompilacji
