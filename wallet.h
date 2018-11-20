@@ -20,11 +20,13 @@
  *    Double check that we are not multiplying UNITS_IN_B by UNITS_IN_B (it happens very often...)
  */
 
-
-using namespace std::chrono;
+// private consts in class
+using namespace std::chrono; // not in header!
 using number = int;
 const number UNITS_IN_B = 100000000;
 
+
+// TODO remmber to reformat style
 
 class WalletOperation {
 
@@ -45,7 +47,7 @@ public:
     }
 
     bool operator!=(const WalletOperation &other) const {
-        return !operator==(other);
+        return !operator==(other); // TODO change that to normal operators
     }
 
     bool operator<(const WalletOperation &other) const {
@@ -93,18 +95,19 @@ private:
     }
 
 public:
+    // TODO delgating constructors
     Wallet() {
         create_and_add(0);
     }
 
-    explicit Wallet(number n) {
+    Wallet(number n) {
         create_and_add(n * UNITS_IN_B);
     }
 
-    Wallet(std::string s) {
+    explicit Wallet(const std::string& s) { // TODO should work also with *char etc
         const std::regex reg("\\s*[-+]?[0-9]*[.,]?[0-9]{1,8}([eE][-+]?[0-9]+)?\\s*");
-        //TODO find out if assert is a good practice in C++
-        assert(std::regex_match(s, reg));
+        assert(std::regex_match(s, reg));  // TODO chage that to exception throwing
+
         number n;
         if (s.find(',') != std::string::npos) {
             std::string s_period = s;
@@ -131,7 +134,6 @@ public:
         operations = std::move(a.operations);
         operations.reserve(operations.size() + b.operations.size());
 
-        // TODO write mergesort manually
         operations.insert(
             operations.end(),
             std::make_move_iterator(b.operations.begin()),
@@ -141,7 +143,7 @@ public:
         create_and_add(units);
     }
 
-    ~Wallet(){
+    ~Wallet() {
 
     }
 
@@ -150,35 +152,7 @@ public:
     }
 
     size_t opSize() const {
-        return static_cast<int>(operations.size());
-    }
-
-    bool operator==(const Wallet &other) const {
-        return units == other.units;
-    }
-
-    bool operator==(number other) const {
-        return units == other * UNITS_IN_B;
-    }
-
-    bool operator<(const Wallet &other) const {
-        return units < other.units;
-    }
-
-    bool operator!=(const Wallet &other) const {
-        return !operator==(other);
-    }
-
-    bool operator<=(const Wallet &other) const {
-        return operator<(other) || operator==(other);
-    }
-
-    bool operator>(const Wallet &other) const {
-        return operator!=(other) && !operator<(other);
-    }
-
-    bool operator>=(const Wallet &other) const {
-        return operator>(other) || operator==(other);
+        return operations.size();
     }
 
     Wallet operator=(Wallet &&rhs) {
@@ -216,12 +190,6 @@ public:
         return (*this);
     }
 
-    Wallet& operator+=(Wallet &&rhs) {
-        //TODO
-        return (*this);
-    }
-
-
     Wallet& operator*=(number rhs) {
         number to_be_added = (rhs * units - units) / UNITS_IN_B;
         *(this) += to_be_added;
@@ -229,23 +197,24 @@ public:
     }
 
     const WalletOperation &operator[](size_t x) const {
-        // TODO will it really return const reference?
         return operations[x];
     }
 
+    // This shouldn't be friend
     friend std::ostream &operator<<(std::ostream &os, const Wallet &dt) {
         os << "Wallet[" << dt.units << " B]" << std::endl;
         return os;
     }
 
     static Wallet fromBinary(const std::string &val) {
+        // TODO check regex and throw exception
         return Wallet(stoi(val, nullptr, 2));
     }
 };
 
 
 Wallet operator*(Wallet &lhs, number rhs) {
-    rhs *= (lhs.getUnits() / UNITS_IN_B);
+    rhs *= (lhs.getUnits() / UNITS_IN_B); // TODO style brackets
     return Wallet(rhs);
 }
 
@@ -259,15 +228,6 @@ Wallet operator+(Wallet &&lhs, Wallet &&rhs) {
     return Wallet(std::forward<Wallet>(lhs), std::forward<Wallet>(rhs));
 }
 
-Wallet operator+(Wallet &&lhs, number rhs) {
-    //TODO
-    Wallet w(2);
-    return w;
-}
-
-Wallet operator+(number lhs, Wallet &rhs){
-    //TODO
-}
 
 Wallet operator+(Wallet &&lhs, Wallet &rhs) {
     number units = (rhs.getUnits() / UNITS_IN_B);
@@ -278,45 +238,46 @@ Wallet operator+(Wallet &&lhs, Wallet &rhs) {
 }
 
 Wallet operator-(Wallet &&lhs, Wallet &&rhs) {
-    auto w = Wallet(std::forward<Wallet>(lhs));
+    auto w = Wallet(std::forward<Wallet>(lhs)); // TODO warning - wrong order - to check
     w -= (rhs.getUnits() / UNITS_IN_B);
     return w;
 }
 
 Wallet operator-(Wallet &&lhs, Wallet &rhs) {
     number units = rhs.getUnits() / UNITS_IN_B;
-    rhs += units;
     auto w = Wallet(std::forward<Wallet>(lhs));
     w -= units;
+    rhs += units;
     return w;
 }
-
-bool operator==(number lhs, const Wallet &rhs) {
-    return lhs * UNITS_IN_B == rhs.getUnits();
+// TODO remove opearors inside 
+bool operator==(const Wallet& lhs, const Wallet &rhs) {
+    return lhs.getUnits() == rhs.getUnits();
 }
 
- bool operator<(number lhs, const Wallet &rhs) {
-     return lhs < rhs.getUnits();
- }
 
- bool operator!=(number lhs, const Wallet &rhs) {
-     return !operator==(lhs, rhs);
- }
+bool operator<(const Wallet& lhs, const Wallet &rhs) {
+     return lhs.getUnits() < rhs.getUnits();
+}
 
- bool operator<=(number lhs, const Wallet &rhs) {
-     return operator<(lhs, rhs) || operator==(lhs, rhs);
- }
+// bool operator!=(const Wallet& lhs, const Wallet &rhs) {
+//     return lhs != rhs;
+// }
 
- bool operator>(number lhs, const Wallet &rhs) {
-     return operator!=(lhs, rhs) && !operator<(lhs, rhs);
- }
+// bool operator<=(const Wallet& lhs, const Wallet &rhs) {
+//     return (lhs < rhs) || (lhs == rhs);
+// }
 
- bool operator>=(number lhs, const Wallet &rhs) {
-     return operator>(lhs, rhs) || operator==(lhs, rhs);
- }
+// bool operator>(const Wallet& lhs, const Wallet &rhs) {
+//     return (lhs != rhs) && !(lhs < rhs);
+// }
+
+// bool operator>=(const Wallet& lhs, const Wallet &rhs) {
+//     return operator>(lhs, rhs) || operator==(lhs, rhs);
+// }
 
 
-const Wallet Empty() {
+const Wallet& Empty() {
     // TODO empty wallet should be non-modifiable
     return Wallet();
 }
