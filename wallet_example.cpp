@@ -1,5 +1,6 @@
 #include "wallet.h"
 #include <iostream>
+#include <cassert>
 
 //TODO bring this back after moving the class declaration to .h file
 static const unsigned int UNITS_IN_B = 100000000;
