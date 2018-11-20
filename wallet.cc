@@ -68,7 +68,7 @@ const std::string WalletOperation::performed_date(time_t time) const {
 }
 
 void Wallet::add_operation(number n) {
-    this->operations.emplace_back(n);
+    operations.emplace_back(n);
 }
 
 void Wallet::check_for_overflow(number n) {
@@ -88,14 +88,14 @@ void Wallet::create_and_add(number n) {
     check_for_overflow(n);
     Wallet::TOTAL_B_UNITS += n;
     units = n;
-    this->add_operation(n);
+    add_operation(n);
 }
 
 void Wallet::move_wallet(Wallet &&w) {
     this->operations = std::move(w.operations);
     this->units = w.units;
     w.units = 0;
-    this->add_operation(units);
+    add_operation(units);
 }
 
 Wallet::Wallet() : Wallet(0ll) {}
@@ -103,7 +103,7 @@ Wallet::Wallet() : Wallet(0ll) {}
 Wallet::Wallet(int n) : Wallet((number) n) {}
 
 Wallet::Wallet(number n) {
-    this->create_and_add(n * UNITS_IN_B);
+    create_and_add(n * UNITS_IN_B);
 }
 
 Wallet::Wallet(const std::string &s) {
@@ -119,7 +119,7 @@ Wallet::Wallet(const std::string &s) {
     } else {
         n = (number) (stof(s) * UNITS_IN_B);
     }
-    this->create_and_add(n);
+    create_and_add(n);
 }
 
 Wallet::Wallet(const char *s) : Wallet(std::string(s)) {}
@@ -127,7 +127,7 @@ Wallet::Wallet(const char *s) : Wallet(std::string(s)) {}
 Wallet::Wallet(char *s) : Wallet(std::string(s)) {}
 
 Wallet::Wallet(Wallet &&w) {
-    this->move_wallet(std::forward<Wallet>(w));
+    move_wallet(std::forward<Wallet>(w));
 }
 
 Wallet::Wallet(Wallet &&a, Wallet &&b) {
@@ -144,23 +144,23 @@ Wallet::Wallet(Wallet &&a, Wallet &&b) {
             std::make_move_iterator(b.operations.end())
     );
     std::sort(operations.begin(), operations.end());
-    this->create_and_add(units);
+    create_and_add(units);
 }
 
 Wallet::~Wallet() {
-    Wallet::TOTAL_B_UNITS -= this->units;
+    Wallet::TOTAL_B_UNITS -= units;
 }
 
 number Wallet::getUnits() const {
-    return this->units;
+    return units;
 }
 
 size_t Wallet::opSize() const {
-    return this->operations.size();
+    return operations.size();
 }
 
 Wallet &Wallet::operator=(Wallet &&rhs) {
-    this->move_wallet(std::forward<Wallet>(rhs));
+    move_wallet(std::forward<Wallet>(rhs));
     return *this;
 }
 
@@ -184,7 +184,7 @@ Wallet &Wallet::operator+=(number rhs) {
     check_for_underflow(this->units, units);
     check_for_overflow(units);
     this->units += units;
-    this->add_operation(this->units);
+    add_operation(this->units);
     return *this;
 }
 
