@@ -28,12 +28,25 @@ int main() {
     w1 = 1 - 2;
 #endif
 #ifdef ERR6
-    Wallet w1;
+    std::cout << "ERR6";
+    Wallet w1(1); // Value zero does not produce the desired test case
     w1 *= -1;
 #endif
 #ifdef ERR7
     Wallet w1;
     w1 = Wallet(1) - Wallet(2);
+#endif
+#ifdef ERR8
+    Wallet w("  1,231  1");
+#endif
+#ifdef ERR9
+    Wallet w("")
+#endif
+#ifdef ERR10
+    Wallet w("0.111111111");
+#endif
+#ifdef ERR11
+    Wallet::fromBinary("010101012");
 #endif
     return 0;
 }

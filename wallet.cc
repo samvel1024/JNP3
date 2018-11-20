@@ -6,10 +6,6 @@
 #include <algorithm>
 #include <regex>
 #include <exception>
-
-
-#include <iostream> // TODO remove that, to debug only
-#include <cassert>
 #include <iomanip>
 
 /*
@@ -37,7 +33,7 @@ WalletOperation::WalletOperation(number u) : units(u) {
     );
 }
 
-int WalletOperation::getUnits() const {
+number WalletOperation::getUnits() const {
     return units;
 };
 
@@ -67,7 +63,7 @@ bool WalletOperation::operator>=(const WalletOperation &other) const {
 
 std::ostream &operator<<(std::ostream &os, const WalletOperation &dt) {
     os << "Wallet balance is " << dt.units
-       << " B after operation made at day " << dt.date_str;
+       << " B after operation made at day " << dt.date_str << std::endl;
     return os;
 }
 
@@ -161,7 +157,7 @@ Wallet::~Wallet() {
     Wallet::TOTAL_B_UNITS -= this->units;
 }
 
-int Wallet::getUnits() const {
+number Wallet::getUnits() const {
     return this->units;
 }
 
@@ -246,7 +242,7 @@ std::ostream &operator<<(std::ostream &os, const Wallet &dt) {
 }
 
 Wallet operator*(Wallet &lhs, number rhs) {
-    rhs *= (lhs.getUnits() / UNITS_IN_B); // TODO style brackets
+    rhs *= (lhs.getUnits() / UNITS_IN_B);
     return Wallet(rhs);
 }
 
@@ -268,7 +264,8 @@ Wallet operator+(Wallet &&lhs, Wallet &rhs) {
 }
 
 Wallet operator-(Wallet &&lhs, Wallet &&rhs) {
-    auto w = Wallet(std::forward<Wallet>(lhs)); // TODO warning - wrong order - to check
+    //warning - wrong order - to check
+    auto w = Wallet(std::forward<Wallet>(lhs));
     w -= (rhs.getUnits() / UNITS_IN_B);
     return w;
 }
@@ -302,7 +299,7 @@ bool operator>(const Wallet &lhs, const Wallet &rhs) {
 }
 
 bool operator>=(const Wallet &lhs, const Wallet &rhs) {
-    return operator>(lhs, rhs) || operator==(lhs, rhs);
+    return (lhs > rhs) || (lhs == rhs);
 }
 
 const Wallet &Empty() {
