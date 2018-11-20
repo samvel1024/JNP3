@@ -86,7 +86,7 @@ void Wallet::add_operation(number n) {
 }
 
 void Wallet::create_and_add(number n) {
-    if (MAX_TOTAL_B_UNITS - Wallet::TOTAL_B_UNITS >= n) {
+    if (MAX_TOTAL_B_UNITS - Wallet::TOTAL_B_UNITS < n) {
         throw std::invalid_argument("Total number of B exceeded");
     }
     Wallet::TOTAL_B_UNITS += n;

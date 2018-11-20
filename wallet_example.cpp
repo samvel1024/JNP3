@@ -106,7 +106,7 @@ void custom() {
 //    Wallet suma8 = Wallet(1) - Wallet(2); // exception
 
     Wallet t1(10000000), t2(10000000);
-   // Wallet t3(2000000); // exception
+//    Wallet t3(2000000); // exception
 //    t1.~Wallet();
 //    t2.~Wallet();
 
