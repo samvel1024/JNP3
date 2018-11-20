@@ -57,5 +57,22 @@ int main() {
 #ifdef ERR10
     auto b = "10" < s2; // błąd kompilacji
 #endif
+
+#ifdef ERR11
+    Wallet suma7 = 2.5 + s2;
+#endif
+
+#ifdef ERR12
+     Wallet emp = Empty();
+#endif
+
+#ifdef ERR13
+    Empty() += Wallet(1); // błąd kompilacji
+#endif
+
+#ifdef ERR14
+     Wallet w6{true}; // błąd kompilacji
+#endif
+
     return 0;
 }

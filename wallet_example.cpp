@@ -89,41 +89,26 @@ void custom() {
 
     Wallet s1, s2;
     bool b;
-    float f;
-//    Wallet s3(true); // błąd kompilacji
-//    Wallet s4('a');  // błąd kompilacji
-//    Wallet s5(f); // błąd kompilacji
-//    s1 += "10"; // błąd kompilacji
-//    s1 = s2 + "10"; // błąd kompilacji
-//    b = "10" < s2; // błąd kompilacji
 
     s1 += Wallet(3);
     s1 *= 3;
     b = 2 < s2;
     Wallet suma5 = 2 + s2;
     Wallet suma6 = Wallet(1) + 2;
-//    Wallet suma7 = 2.5 + s2; // błąd kompilacji
-//    Wallet suma8 = Wallet(1) - Wallet(2); // exception
 
     Wallet t1(10000000), t2(10000000);
 //    Wallet t3(2000000); // exception
-//    t1.~Wallet();
-//    t2.~Wallet();
 
     Wallet u1(1), u2(2);
     u1 += 1;
     u2 += Wallet(1);
     u1 += 0;
-    // std::cout << "AAAA1" << u1.opSize() << "\n";
-    // std::cout << "AAAA2" << u2.opSize() << "\n";
 
     // u2 += 1 += Wallet(1); // wrong
     Wallet u3(std::move(u1), std::move(u2));
 
     assert(u3.opSize() == 6);
     assert(u3.getUnits() == 5 * UNITS_IN_B);
-
-    std::cout << "AAAA" << u3.opSize() << "\n";
 
     Wallet x1(1), x2(2);
     assert(x1 < x2);
@@ -133,8 +118,6 @@ void custom() {
     assert(x2 >= x1);
     assert(x2 >= x2);
     assert(x2 > x1);
-
-    std::cout << "AAAA" << u3.opSize() << "\n";
 
     assert(Wallet(1) < x2);
     assert(Wallet(1) <= x2);
@@ -152,18 +135,11 @@ void custom() {
     assert(Wallet(2) >= Wallet(2));
     assert(Wallet(2) > Wallet(1));
 
-    // Wallet lolz = Wallet(1) += 2; // wrong
-    // Wallet omg = Wallet(3) += Wallet(2); // wrong
-    // std::cout << lolz << "\n";
-    // std::cout << lolz[0] << "\n";
-
-//     Wallet emp = Empty(); // compilation error
     assert(Empty() == 0);
     assert(Empty() < Wallet(1));
     assert(Empty().getUnits() == 0);
     assert(Empty().opSize() == 1);
     assert(Empty()[0].getUnits() == 0);
-//    Empty() += Wallet(1); // błąd kompilacji
 
     Wallet w1;
     assert(w1 == Empty());
@@ -182,7 +158,6 @@ void custom() {
     assert(Wallet(" 1.2000 ") == Wallet("1,2"));
     assert(Wallet(" 1.2000 ") == Wallet(a));
     assert(Wallet(str) == Wallet("1,2"));
-//     Wallet("1.a"); // exception
 
     assert(Wallet(2) + w2 == Wallet(3));
     assert(Wallet(1) + Wallet(2) == Wallet(3));
@@ -203,7 +178,6 @@ void custom() {
     assert(Wallet(move(w4)).opSize() == 4);
 
     Wallet w5{2};
-    // Wallet w6{true}; // błąd kompilacji
     Wallet w7 = Wallet(10) - w5;
     assert(w5 == Wallet(4));
     assert(w7 == Wallet(8));
