@@ -8,12 +8,6 @@
 #include <exception>
 #include <iomanip>
 
-/*
- * Side notes for implementation
- *    Check for self-assignment in assignment operations
- *    Double check that we are not repeating adding history operations anywhere
- *    Double check that we are not multiplying UNITS_IN_B by UNITS_IN_B (it happens very often...)
- */
 
 const number UNITS_IN_B = 100000000ll;
 const number MAX_TOTAL_B_UNITS = 21000000ll * UNITS_IN_B;
@@ -59,7 +53,7 @@ bool WalletOperation::operator>=(const WalletOperation &other) const {
 
 std::ostream &operator<<(std::ostream &os, const WalletOperation &dt) {
     os << "Wallet balance is " << dt.units
-       << " B after operation made at day " << dt.date_str << std::endl;
+       << " B after operation made at day " << dt.date_str;
     return os;
 }
 
@@ -161,8 +155,7 @@ size_t Wallet::opSize() const {
     return this->operations.size();
 }
 
-Wallet Wallet::operator=(Wallet &&rhs) {
-//    if (*this == rhs) return std::move(*this);
+Wallet &Wallet::operator=(Wallet &&rhs) {
     return Wallet(std::forward<Wallet>(rhs));
 }
 
@@ -257,7 +250,6 @@ Wallet operator+(Wallet &&lhs, Wallet &rhs) {
 }
 
 Wallet operator-(Wallet &&lhs, Wallet &&rhs) {
-    //warning - wrong order - to check
     auto w = Wallet(std::forward<Wallet>(lhs));
     w -= (rhs.getUnits() / UNITS_IN_B);
     return w;
