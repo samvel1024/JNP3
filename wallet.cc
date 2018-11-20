@@ -65,7 +65,7 @@ bool WalletOperation::operator>=(const WalletOperation &other) const {
     return (*this > other) || (*this == other);
 }
 
-std::ostream& operator<<(std::ostream &os, const WalletOperation &dt) {
+std::ostream &operator<<(std::ostream &os, const WalletOperation &dt) {
     os << "Wallet balance is " << dt.units
        << " B after operation made at day " << dt.date_str;
     return os;
@@ -86,8 +86,12 @@ void Wallet::add_operation(number n) {
 }
 
 void Wallet::create_and_add(number n) {
+    if (0 > n) {
+        throw std::underflow_error("Wallets cannot have less than 0 units");
+    }
+
     if (MAX_TOTAL_B_UNITS - Wallet::TOTAL_B_UNITS < n) {
-        throw std::invalid_argument("Total number of B exceeded");
+        throw std::overflow_error("Total number of B exceeded");
     }
     Wallet::TOTAL_B_UNITS += n;
     units = n;
@@ -95,15 +99,16 @@ void Wallet::create_and_add(number n) {
 }
 
 Wallet::Wallet() : Wallet(0ll) {}
+
 Wallet::Wallet(int n) : Wallet((number) n) {}
 
 Wallet::Wallet(number n) {
     this->create_and_add(n * UNITS_IN_B);
 }
 
-Wallet::Wallet(const std::string& s) {
+Wallet::Wallet(const std::string &s) {
     static const std::regex reg("\\s*[0-9]*[.,]?[0-9]{1,8}([eE][-+]?[0-9]+)?\\s*");
-    if(!std::regex_match(s, reg)){
+    if (!std::regex_match(s, reg)) {
         throw std::invalid_argument("Given string is not a valid number");
     }
     number n;
@@ -117,8 +122,9 @@ Wallet::Wallet(const std::string& s) {
     this->create_and_add(n);
 }
 
-Wallet::Wallet(const char* s) : Wallet(std::string(s)) {}
-Wallet::Wallet(char* s) : Wallet(std::string(s)) {}
+Wallet::Wallet(const char *s) : Wallet(std::string(s)) {}
+
+Wallet::Wallet(char *s) : Wallet(std::string(s)) {}
 
 Wallet::Wallet(Wallet &&w) {
     operations = std::move(w.operations);
@@ -160,17 +166,17 @@ Wallet Wallet::operator=(Wallet &&rhs) {
     return Wallet(std::forward<Wallet>(rhs));
 }
 
-Wallet& Wallet::operator-=(Wallet&& rhs) {
+Wallet &Wallet::operator-=(Wallet &&rhs) {
     *this -= rhs;
     return *this;
 }
 
-Wallet& Wallet::operator+=(Wallet&& rhs) {
+Wallet &Wallet::operator+=(Wallet &&rhs) {
     *this += rhs;
     return *this;
 }
 
-Wallet& Wallet::operator+=(Wallet &rhs) {
+Wallet &Wallet::operator+=(Wallet &rhs) {
     // the ordering of these is important!
     // as we have to care not to exceed the Bs global limit
     number units = rhs.units;
@@ -182,8 +188,13 @@ Wallet& Wallet::operator+=(Wallet &rhs) {
     return *this;
 }
 
-Wallet& Wallet::operator-=(Wallet &rhs) {
+Wallet &Wallet::operator-=(Wallet &rhs) {
     // the ordering of these is important!
+
+    if (rhs.units >= this->units) {
+        throw std::underflow_error("Wallets cannot have less than 0 units");
+    }
+
     this->units -= rhs.units;
     this->add_operation(this->units);
 
@@ -192,14 +203,19 @@ Wallet& Wallet::operator-=(Wallet &rhs) {
     return *this;
 }
 
-Wallet& Wallet::operator*=(number rhs) {
+Wallet &Wallet::operator*=(number rhs) {
     number to_be_added = (rhs * units - units) / UNITS_IN_B;
-    *this += to_be_added;
+    if (to_be_added >= 0) {
+        *this += to_be_added;
+    }
+    else {
+        *this -= (-to_be_added);   
+    }
     return *this;
 }
 
 
-const WalletOperation& Wallet::operator[](size_t x) const {
+const WalletOperation &Wallet::operator[](size_t x) const {
     return operations[x];
 }
 
@@ -253,27 +269,28 @@ Wallet operator-(Wallet &&lhs, Wallet &rhs) {
     rhs += units;
     return w;
 }
-bool operator==(const Wallet& lhs, const Wallet &rhs) {
+
+bool operator==(const Wallet &lhs, const Wallet &rhs) {
     return lhs.getUnits() == rhs.getUnits();
 }
 
-bool operator<(const Wallet& lhs, const Wallet &rhs) {
+bool operator<(const Wallet &lhs, const Wallet &rhs) {
     return lhs.getUnits() < rhs.getUnits();
 }
 
-bool operator!=(const Wallet& lhs, const Wallet &rhs) {
+bool operator!=(const Wallet &lhs, const Wallet &rhs) {
     return !(lhs == rhs);
 }
 
-bool operator<=(const Wallet& lhs, const Wallet &rhs) {
+bool operator<=(const Wallet &lhs, const Wallet &rhs) {
     return (lhs < rhs) || (lhs == rhs);
 }
 
-bool operator>(const Wallet& lhs, const Wallet &rhs) {
+bool operator>(const Wallet &lhs, const Wallet &rhs) {
     return (lhs != rhs) && !(lhs < rhs);
 }
 
-bool operator>=(const Wallet& lhs, const Wallet &rhs) {
+bool operator>=(const Wallet &lhs, const Wallet &rhs) {
     return operator>(lhs, rhs) || operator==(lhs, rhs);
 }
 
