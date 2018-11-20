@@ -11,8 +11,6 @@
 /*
  * Side notes for implementation
  *    Check for self-assignment in assignment operations
- *    Define your binary (+) arithmetic operators using your compound assignment operators (+=)
- *    Double check if there is no copy constructor/copy assignment and delete if there is
  *    Double check that we are not repeating adding history operations anywhere
  *    Double check that we are not multiplying UNITS_IN_B by UNITS_IN_B (it happens very often...)
  */
@@ -22,8 +20,6 @@ const number MAX_TOTAL_B_UNITS = 21000000ll * UNITS_IN_B;
 using namespace std::chrono;
 
 WalletOperation::WalletOperation(number u) : units(u) {
-    // some assert here?
-
     auto time_point = std::chrono::system_clock::now();
     performed = duration_cast<milliseconds>(
             time_point.time_since_epoch()
@@ -166,6 +162,7 @@ size_t Wallet::opSize() const {
 }
 
 Wallet Wallet::operator=(Wallet &&rhs) {
+//    if (*this == rhs) return std::move(*this);
     return Wallet(std::forward<Wallet>(rhs));
 }
 
@@ -204,6 +201,7 @@ Wallet &Wallet::operator+=(Wallet &rhs) {
 
 Wallet &Wallet::operator-=(Wallet &rhs) {
     // the ordering of these is important!
+    // as we have to care not to exceed the Bs global limit
     // if rhs > *this, there will be exception thrown
     number bs = rhs.getUnits() / UNITS_IN_B;
     *this -= bs;
@@ -211,14 +209,9 @@ Wallet &Wallet::operator-=(Wallet &rhs) {
     return *this;
 }
 
-
 Wallet &Wallet::operator*=(number rhs) {
     number to_be_added = (rhs * units - units) / UNITS_IN_B;
-    if (to_be_added >= 0) {
-        *this += to_be_added;
-    } else {
-        *this -= (-to_be_added);
-    }
+    *this += to_be_added;
     return *this;
 }
 
@@ -242,12 +235,12 @@ std::ostream &operator<<(std::ostream &os, const Wallet &dt) {
 }
 
 Wallet operator*(Wallet &lhs, number rhs) {
-    rhs *= (lhs.getUnits() / UNITS_IN_B);
+    rhs *= lhs.getUnits() / UNITS_IN_B;
     return Wallet(rhs);
 }
 
 Wallet operator*(number lhs, Wallet &rhs) {
-    lhs *= (rhs.getUnits() / UNITS_IN_B);
+    lhs *= rhs.getUnits() / UNITS_IN_B;
     return Wallet(lhs);
 }
 
@@ -256,7 +249,7 @@ Wallet operator+(Wallet &&lhs, Wallet &&rhs) {
 }
 
 Wallet operator+(Wallet &&lhs, Wallet &rhs) {
-    number units = (rhs.getUnits() / UNITS_IN_B);
+    number units = rhs.getUnits() / UNITS_IN_B;
     rhs -= units;
     auto w = Wallet(std::forward<Wallet>(lhs));
     w += units;

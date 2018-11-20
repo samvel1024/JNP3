@@ -40,7 +40,7 @@ int main() {
     Wallet w("  1,231  1");
 #endif
 #ifdef ERR9
-    Wallet w("")
+    Wallet w("");
 #endif
 #ifdef ERR10
     Wallet w("0.111111111");
