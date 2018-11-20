@@ -20,7 +20,11 @@ void official() {
     // Wallet w1111(true); // exception
     // Wallet ssss = Wallet(1) + Wallet(2); // TODO remember about that!
     // assert(ssss.opSize() == 2);
-    std::cout << "abcd\n";
+
+    Wallet ww1;
+    ww1 = std::move(ww1);
+    std::cout << "abcde\n";
+
 
     assert(Empty() == 0);
     assert(Empty() < Wallet(1));

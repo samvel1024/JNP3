@@ -51,6 +51,8 @@ private:
 
     void check_for_overflow(number);
 
+    void move_wallet(Wallet &&);
+
 public:
     template<typename T>
     Wallet(T n) = delete;
@@ -77,7 +79,7 @@ public:
 
     size_t opSize() const;
 
-    Wallet operator=(Wallet &&);
+    Wallet &operator=(Wallet &&);
 
     Wallet &operator-=(Wallet &&);
 

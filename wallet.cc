@@ -91,6 +91,13 @@ void Wallet::create_and_add(number n) {
     this->add_operation(n);
 }
 
+void Wallet::move_wallet(Wallet &&w) {
+    this->operations = std::move(w.operations);
+    this->units = w.units;
+    w.units = 0;
+    this->add_operation(units);
+}
+
 Wallet::Wallet() : Wallet(0ll) {}
 
 Wallet::Wallet(int n) : Wallet((number) n) {}
@@ -120,10 +127,7 @@ Wallet::Wallet(const char *s) : Wallet(std::string(s)) {}
 Wallet::Wallet(char *s) : Wallet(std::string(s)) {}
 
 Wallet::Wallet(Wallet &&w) {
-    operations = std::move(w.operations);
-    units = w.units;
-    w.units = 0;
-    add_operation(units);
+    this->move_wallet(std::forward<Wallet>(w));
 }
 
 Wallet::Wallet(Wallet &&a, Wallet &&b) {
@@ -156,7 +160,8 @@ size_t Wallet::opSize() const {
 }
 
 Wallet &Wallet::operator=(Wallet &&rhs) {
-    return Wallet(std::forward<Wallet>(rhs));
+    this->move_wallet(std::forward<Wallet>(rhs));
+    return *this;
 }
 
 Wallet &Wallet::operator-=(Wallet &&rhs) {
