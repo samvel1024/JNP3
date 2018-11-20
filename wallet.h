@@ -177,32 +177,37 @@ public:
         return Wallet(std::forward<Wallet>(rhs));
     }
 
+    Wallet &operator-=(Wallet&& rhs) {
+        *this -= rhs;
+        return *this;
+    }
+
+    Wallet &operator+=(Wallet&& rhs) {
+        *this += rhs;
+        return *this;
+    }
+
     Wallet &operator+=(Wallet &rhs) {
         // the ordering of these is important!
         // as we have to care not to exceed the Bs global limit
         // TODO remember to check adding history here
-        rhs -= rhs.units;
-        *this += rhs.units;
+        number units = rhs.units;
+        rhs.units = 0;
+        rhs.add_operation(rhs.units);
+
+        this->units += units;
+        add_operation(this->units);
         return *this;
     }
 
     Wallet &operator-=(Wallet &rhs) {
         // the ordering of these is important!
         // TODO remember to check adding history here
-        *this -= rhs.units;
-        rhs += rhs.units;
-        return *this;
-    }
+        this->units -= rhs.units;
+        add_operation(this->units);
 
-
-    Wallet &operator-=(number rhs) {
-        *this += (-rhs);
-        return *this;
-    }
-
-    Wallet &operator+=(number rhs) {
-        this->units += rhs * UNITS_IN_B;
-        this->add_operation(this->units);
+        rhs.units += rhs.units;
+        rhs.add_operation(rhs.units);
         return *this;
     }
 
@@ -212,8 +217,6 @@ public:
         return *this;
     }
 
-    // TODO change that, make wallet ops the basic ones and number ones not
-    
 
     const WalletOperation &operator[](size_t x) const {
         return operations[x];
@@ -277,7 +280,7 @@ bool operator<(const Wallet& lhs, const Wallet &rhs) {
 }
 
 bool operator!=(const Wallet& lhs, const Wallet &rhs) {
-    return lhs != rhs;
+    return !(lhs == rhs);
 }
 
 bool operator<=(const Wallet& lhs, const Wallet &rhs) {

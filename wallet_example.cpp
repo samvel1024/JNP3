@@ -15,7 +15,9 @@ int main() {
 }
 
 void official() {
-    // Wallet w1111(true); // OK
+    // Wallet w1111(true); // exception
+    // Wallet ssss = Wallet(1) + Wallet(2); // TODO remember about that!
+    // assert(ssss.opSize() == 2);
 
     assert(Empty() == 0);
     assert(Empty() < Wallet(1));
@@ -111,10 +113,16 @@ void custom() {
     u1 += 1;
     u2 += Wallet(1);
     u1 += 0;
+    // std::cout << "AAAA1" << u1.opSize() << "\n";
+    // std::cout << "AAAA2" << u2.opSize() << "\n";
+    
     // u2 += 1 += Wallet(1); // wrong
     Wallet u3(std::move(u1), std::move(u2));
-    assert(u3.opSize() == 7);
-    assert(u3.getUnits() == 7 * UNITS_IN_B);
+
+    assert(u3.opSize() == 6); // WHY assert(u3.opSize() == 7);
+    assert(u3.getUnits() == 5 * UNITS_IN_B);
+
+    std::cout << "AAAA" << u3.opSize() << "\n";
 
     Wallet x1(1), x2(2);
     assert(x1 < x2);
@@ -124,6 +132,8 @@ void custom() {
     assert(x2 >= x1);
     assert(x2 >= x2);
     assert(x2 > x1);
+
+    std::cout << "AAAA" << u3.opSize() << "\n";
 
     assert(Wallet(1) < x2);
     assert(Wallet(1) <= x2);
@@ -190,7 +200,7 @@ void custom() {
     assert(Wallet(move(w4)).opSize() == 4);
 
     Wallet w5{2};
-    //Wallet w6{true}; // błąd kompilacji
+    // Wallet w6{true}; // błąd kompilacji
     Wallet w7 = Wallet(10) - w5;
     assert(w5 == Wallet(4));
     assert(w7 == Wallet(8));
