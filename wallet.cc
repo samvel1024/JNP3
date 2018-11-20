@@ -37,7 +37,7 @@ WalletOperation::WalletOperation(number u) : units(u) {
     );
 }
 
-int WalletOperation::getUnits() const {
+number WalletOperation::getUnits() const {
     return units;
 };
 
@@ -67,7 +67,7 @@ bool WalletOperation::operator>=(const WalletOperation &other) const {
 
 std::ostream &operator<<(std::ostream &os, const WalletOperation &dt) {
     os << "Wallet balance is " << dt.units
-       << " B after operation made at day " << dt.date_str;
+       << " B after operation made at day " << dt.date_str << std::endl;
     return os;
 }
 
@@ -161,7 +161,7 @@ Wallet::~Wallet() {
     Wallet::TOTAL_B_UNITS -= this->units;
 }
 
-int Wallet::getUnits() const {
+number Wallet::getUnits() const {
     return this->units;
 }
 
@@ -302,7 +302,7 @@ bool operator>(const Wallet &lhs, const Wallet &rhs) {
 }
 
 bool operator>=(const Wallet &lhs, const Wallet &rhs) {
-    return operator>(lhs, rhs) || operator==(lhs, rhs);
+    return (lhs > rhs) || (lhs == rhs);
 }
 
 const Wallet &Empty() {

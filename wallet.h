@@ -25,7 +25,7 @@ private:
 public:
     WalletOperation(number);
 
-    int getUnits() const;
+    number getUnits() const;
 
     bool operator==(const WalletOperation &) const;
 
@@ -79,7 +79,7 @@ public:
 
     ~Wallet();
 
-    int getUnits() const;
+    number getUnits() const;
 
     size_t opSize() const;
 
@@ -97,7 +97,7 @@ public:
 
     Wallet &operator-=(number);
 
-    Wallet &operator*=(number rhs);
+    Wallet &operator*=(number);
 
     const WalletOperation &operator[](size_t) const;
 
