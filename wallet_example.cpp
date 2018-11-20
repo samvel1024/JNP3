@@ -23,6 +23,7 @@ void official() {
 
     Wallet ww1;
     ww1 = std::move(ww1);
+    assert(ww1.opSize() == 1);
     std::cout << "abcde\n";
 
 

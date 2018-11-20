@@ -160,7 +160,9 @@ size_t Wallet::opSize() const {
 }
 
 Wallet &Wallet::operator=(Wallet &&rhs) {
-    move_wallet(std::forward<Wallet>(rhs));
+    if (this != &rhs) {
+        move_wallet(std::forward<Wallet>(rhs));
+    }
     return *this;
 }
 
