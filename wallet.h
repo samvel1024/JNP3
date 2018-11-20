@@ -6,10 +6,12 @@
 #include <chrono>
 #include <algorithm>
 #include <regex>
+#include <exception>
 
 
 #include <iostream> // TODO remove that, to debug only
 #include <cassert>
+#include <iomanip>
 
 /*
  * Side notes for implementation
@@ -32,7 +34,7 @@ class WalletOperation {
 
 public:
     WalletOperation(number u) : units(u) {
-        // some assert here that u >= 0 etc
+        // some assert here?
         performed = duration_cast<milliseconds>(
             system_clock::now().time_since_epoch()
         );
@@ -68,7 +70,7 @@ public:
 
     friend std::ostream &operator<<(std::ostream &os, const WalletOperation &dt) {
         os << "Wallet balance is " << dt.units
-           << " B after operation made at day "; // TODO some way to convert millis to
+           << " B after operation made at day " << dt.performed_str << std::endl;
         return os;
     }
 
@@ -82,7 +84,7 @@ private:
     std::vector<WalletOperation> operations;
     number units;
 
-    static number TOTAL_B_UNITS; 
+    static number TOTAL_B_UNITS;
 
     void create_and_add(number n) {
         units = n;
@@ -103,11 +105,11 @@ public:
     Wallet(number n) {
         create_and_add(n * UNITS_IN_B);
     }
-
-    explicit Wallet(const std::string& s) { // TODO should work also with *char etc
-        const std::regex reg("\\s*[-+]?[0-9]*[.,]?[0-9]{1,8}([eE][-+]?[0-9]+)?\\s*");
-        assert(std::regex_match(s, reg));  // TODO chage that to exception throwing
-
+    Wallet(std::string s) {
+        static const std::regex reg("\\s*[-+]?[0-9]*[.,]?[0-9]{1,8}([eE][-+]?[0-9]+)?\\s*");
+        if(!std::regex_match(s, reg)){
+            throw std::invalid_argument("Given string is not a valid number");
+        }
         number n;
         if (s.find(',') != std::string::npos) {
             std::string s_period = s;
@@ -158,10 +160,10 @@ public:
     Wallet operator=(Wallet &&rhs) {
         // return value optimization should kick in here
         // TODO ask about that during lab
-       return Wallet(std::forward<Wallet>(rhs));
+        return Wallet(std::forward<Wallet>(rhs));
     }
 
-    Wallet& operator+=(Wallet &rhs) {
+    Wallet &operator+=(Wallet &rhs) {
         // the ordering of these is important!
         // as we have to care not to exceed the Bs global limit
         // TODO remember to check adding history here
@@ -170,7 +172,7 @@ public:
         return (*this);
     }
 
-    Wallet& operator-=(Wallet &rhs) {
+    Wallet &operator-=(Wallet &rhs) {
         // the ordering of these is important!
         // TODO remember to check adding history here
         *(this) -= rhs.units;
@@ -179,12 +181,12 @@ public:
     }
 
 
-    Wallet& operator-=(number rhs) {
+    Wallet &operator-=(number rhs) {
         *(this) += (-rhs);
         return (*this);
     }
 
-    Wallet& operator+=(number rhs) {
+    Wallet &operator+=(number rhs) {
         this->units += (rhs * UNITS_IN_B);
         this->add_operation(this->units);
         return (*this);
@@ -207,7 +209,10 @@ public:
     }
 
     static Wallet fromBinary(const std::string &val) {
-        // TODO check regex and throw exception
+        static const std::regex reg("\\s*(0|1)+\\s*");
+        if (!std::regex_match(val, reg)) {
+            throw std::invalid_argument("Given string is not valid binary");
+        }
         return Wallet(stoi(val, nullptr, 2));
     }
 };
@@ -218,7 +223,7 @@ Wallet operator*(Wallet &lhs, number rhs) {
     return Wallet(rhs);
 }
 
-Wallet operator*(number lhs, Wallet& rhs) {
+Wallet operator*(number lhs, Wallet &rhs) {
     lhs *= (rhs.getUnits() / UNITS_IN_B);
     return Wallet(lhs);
 }
@@ -250,11 +255,9 @@ Wallet operator-(Wallet &&lhs, Wallet &rhs) {
     rhs += units;
     return w;
 }
-// TODO remove opearors inside 
 bool operator==(const Wallet& lhs, const Wallet &rhs) {
     return lhs.getUnits() == rhs.getUnits();
 }
-
 
 bool operator<(const Wallet& lhs, const Wallet &rhs) {
      return lhs.getUnits() < rhs.getUnits();
@@ -276,10 +279,9 @@ bool operator<(const Wallet& lhs, const Wallet &rhs) {
 //     return operator>(lhs, rhs) || operator==(lhs, rhs);
 // }
 
-
-const Wallet& Empty() {
-    // TODO empty wallet should be non-modifiable
-    return Wallet();
+const Wallet &Empty() {
+    static const Wallet empty = Wallet();
+    return empty;
 }
 
 #endif

@@ -10,7 +10,6 @@ void official();
 using std::move;
 
 int main() {
-    // custom();
     official();
 }
 
@@ -24,6 +23,9 @@ void official() {
     assert(Empty().getUnits() == 0);
     assert(Empty().opSize() == 1);
     assert(Empty()[0].getUnits() == 0);
+    Wallet suma4 = Wallet(1) + Wallet(2);
+
+    assert(suma4.opSize() == 3);
 
     Wallet w1;
     assert(w1 == Empty());
@@ -65,6 +67,7 @@ void official() {
     assert(w6 == Wallet(8));
 }
 
+<<<<<<< HEAD
 // void custom() {
 
 //     Wallet q1, q2;
@@ -194,4 +197,3 @@ void official() {
 //     assert(w5 == Wallet(4));
 //     assert(w7 == Wallet(8));
 // }
-
