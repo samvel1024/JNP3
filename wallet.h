@@ -52,7 +52,9 @@ private:
     void create_and_add(number);
 
     void add_operation(number);
-
+    void check_for_underflow(number);
+    void check_for_overflow(number);
+    
 public:
     template<typename T>
     Wallet(T n) = delete;
