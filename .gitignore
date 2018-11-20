@@ -7,3 +7,4 @@
 !wallet.h
 !wallet.cc
 !err_test.cc
+!err_runtime.cc
