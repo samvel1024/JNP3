@@ -7,8 +7,6 @@
 #include <algorithm>
 #include <regex>
 #include <exception>
-
-#include <cassert>
 #include <iomanip>
 
 using number = long long int;

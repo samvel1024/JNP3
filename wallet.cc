@@ -6,10 +6,6 @@
 #include <algorithm>
 #include <regex>
 #include <exception>
-
-
-#include <iostream> // TODO remove that, to debug only
-#include <cassert>
 #include <iomanip>
 
 /*
@@ -246,7 +242,7 @@ std::ostream &operator<<(std::ostream &os, const Wallet &dt) {
 }
 
 Wallet operator*(Wallet &lhs, number rhs) {
-    rhs *= (lhs.getUnits() / UNITS_IN_B); // TODO style brackets
+    rhs *= (lhs.getUnits() / UNITS_IN_B);
     return Wallet(rhs);
 }
 
@@ -268,7 +264,8 @@ Wallet operator+(Wallet &&lhs, Wallet &rhs) {
 }
 
 Wallet operator-(Wallet &&lhs, Wallet &&rhs) {
-    auto w = Wallet(std::forward<Wallet>(lhs)); // TODO warning - wrong order - to check
+    //warning - wrong order - to check
+    auto w = Wallet(std::forward<Wallet>(lhs));
     w -= (rhs.getUnits() / UNITS_IN_B);
     return w;
 }
